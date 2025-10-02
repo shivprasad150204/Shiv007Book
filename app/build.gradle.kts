@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.shiv007.shiv007book"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.shiv007.shiv007book"
