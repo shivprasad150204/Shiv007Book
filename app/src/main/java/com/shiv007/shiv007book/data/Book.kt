@@ -7,3 +7,4 @@ data class Book(
     val pages: Int,
     val isRead: Boolean = false
 )
+

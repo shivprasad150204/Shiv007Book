@@ -3,35 +3,38 @@ package com.shiv007.shiv007book.data
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
-class BookRepository(
-    private val dao: BookDao = BookDatabase.dao
-) {
+/**
+ * Very simple in-memory repository.
+ * No Room, no Firebase. Survives only while the app is running.
+ */
+class BookRepository {
 
-    private val _books = mutableStateListOf<Book>().apply {
-        addAll(dao.getAllBooks())
-    }
-    val books: SnapshotStateList<Book> = _books
+    private val _books = mutableStateListOf<Book>()
+    val books: SnapshotStateList<Book> get() = _books
+
+    private var nextId = 1
 
     fun addBook(title: String, author: String, pages: Int, isRead: Boolean) {
-        val newBook = dao.insertBook(
-            Book(title = title, author = author, pages = pages, isRead = isRead)
+        val book = Book(
+            id = nextId++,
+            title = title,
+            author = author,
+            pages = pages,
+            isRead = isRead
         )
-        _books.add(newBook)
+        _books.add(book)
     }
 
     fun updateBook(id: Int, title: String, author: String, pages: Int, isRead: Boolean) {
-        val updated = Book(id, title, author, pages, isRead)
-        dao.updateBook(updated)
         val index = _books.indexOfFirst { it.id == id }
-        if (index >= 0) _books[index] = updated
-    }
-
-    fun deleteBook(id: Int) {
-        dao.getBookById(id)?.let { book ->
-            dao.deleteBook(book)
-            _books.removeAll { it.id == id }
+        if (index >= 0) {
+            _books[index] = Book(id, title, author, pages, isRead)
         }
     }
 
-    fun getBook(id: Int): Book? = dao.getBookById(id)
+    fun deleteBook(id: Int) {
+        _books.removeAll { it.id == id }
+    }
+
+    fun getBookById(id: Int): Book? = _books.find { it.id == id }
 }

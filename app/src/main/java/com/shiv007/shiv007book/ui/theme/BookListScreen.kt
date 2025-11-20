@@ -1,4 +1,4 @@
-package com.shiv007.shiv007book.ui
+package com.shiv007.shiv007book.ui.theme
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -6,41 +6,49 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.shiv007.shiv007book.ViewModel.BookViewModel
 import com.shiv007.shiv007book.data.Book
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookListScreen(
-    viewModel: BookViewModel,
-    onAdd: () -> Unit,
-    onSelect: (Int) -> Unit
+    bookViewModel: BookViewModel,
+    onAddBook: () -> Unit,
+    onBookSelected: (Int) -> Unit,
+    onLogout: () -> Unit
 ) {
-    val books = viewModel.books
+    val books = bookViewModel.books
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Book Tracker") }
+                title = { Text("My Books") },
+                actions = {
+                    TextButton(onClick = onLogout) {
+                        Text("Logout")
+                    }
+                }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) { Text("+") }
+            FloatingActionButton(onClick = onAddBook) {
+                Text("+")
+            }
         }
     ) { padding ->
-
         if (books.isEmpty()) {
             Box(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
-                Text("No books yet. Add one!")
+                Text("No books yet. Tap + to add.")
             }
         } else {
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -49,7 +57,7 @@ fun BookListScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(books) { book ->
-                    BookItem(book = book, onClick = { onSelect(book.id) })
+                    BookListItem(book = book, onClick = { onBookSelected(book.id) })
                 }
             }
         }
@@ -57,17 +65,20 @@ fun BookListScreen(
 }
 
 @Composable
-fun BookItem(book: Book, onClick: () -> Unit) {
+private fun BookListItem(book: Book, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(book.title, style = MaterialTheme.typography.titleMedium)
-            Text("by ${book.author}")
-            Text("${book.pages} pages")
-            Text(if (book.isRead) "Finished" else "Not read yet")
+            Text("by ${book.author}", style = MaterialTheme.typography.bodyMedium)
+            Text("${book.pages} pages", style = MaterialTheme.typography.bodySmall)
+            Text(
+                if (book.isRead) "Finished" else "Not read yet",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

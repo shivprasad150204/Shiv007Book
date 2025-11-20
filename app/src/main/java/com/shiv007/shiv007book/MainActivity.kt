@@ -3,58 +3,87 @@ package com.shiv007.shiv007book
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
-import com.shiv007.shiv007book.ui.*
-import com.shiv007.shiv007book.ui.theme.Shiv007BookTheme
+import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.shiv007.shiv007book.ViewModel.AuthViewModel
+import com.shiv007.shiv007book.ViewModel.BookViewModel
+import com.shiv007.shiv007book.data.Book
+import com.shiv007.shiv007book.ui.theme.*
 
+/** Simple navigation states for the app */
 sealed class Screen {
+    object Login : Screen()
     object List : Screen()
-    data class Detail(val id: Int) : Screen()
-    data class Add(val id: Int? = null) : Screen()
+    data class Detail(val bookId: Int) : Screen()
+    data class AddOrEdit(val bookId: Int? = null) : Screen()
 }
 
 class MainActivity : ComponentActivity() {
+
+    private val authViewModel: AuthViewModel by viewModels()
+    private val bookViewModel: BookViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             Shiv007BookTheme {
+                var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
 
-                val viewModel = remember { BookViewModel() }
-                var screen by remember { mutableStateOf<Screen>(Screen.List) }
+                when (val screen = currentScreen) {
 
-                when (val s = screen) {
+                    Screen.Login -> LoginScreen(
+                        authViewModel = authViewModel,
+                        onLoginSuccess = { currentScreen = Screen.List }
+                    )
 
-                    is Screen.List -> BookListScreen(
-                        viewModel = viewModel,
-                        onAdd = { screen = Screen.Add(null) },
-                        onSelect = { id ->
-                            viewModel.selectBook(id)
-                            screen = Screen.Detail(id)
+                    Screen.List -> BookListScreen(
+                        bookViewModel = bookViewModel,
+                        onAddBook = { currentScreen = Screen.AddOrEdit(null) },
+                        onBookSelected = { id ->
+                            bookViewModel.selectBook(id)
+                            currentScreen = Screen.Detail(id)
+                        },
+                        onLogout = {
+                            authViewModel.logout()
+                            currentScreen = Screen.Login
                         }
                     )
 
-                    is Screen.Detail -> BookDetailScreen(
-                        book = viewModel.getSelectedBook(),
-                        onBack = { screen = Screen.List },
-                        onEdit = { id -> screen = Screen.Add(id) },
-                        onDelete = { id -> viewModel.deleteBook(id) }
-                    )
+                    is Screen.Detail -> {
+                        val book: Book? =
+                            bookViewModel.books.find { it.id == screen.bookId }
+                        BookDetailScreen(
+                            book = book,
+                            onBack = { currentScreen = Screen.List },
+                            onEdit = { id -> currentScreen = Screen.AddOrEdit(id) },
+                            onDelete = { id -> bookViewModel.deleteBook(id) }
+                        )
+                    }
 
-                    is Screen.Add -> {
-                        val existing = s.id?.let { viewModel.getSelectedBook() }
+                    is Screen.AddOrEdit -> {
+                        val existing =
+                            screen.bookId?.let { id -> bookViewModel.books.find { it.id == id } }
                         AddBookScreen(
-                            existing = existing,
+                            existingBook = existing,
                             onSave = { title, author, pages, isRead ->
                                 if (existing == null) {
-                                    viewModel.addBook(title, author, pages, isRead)
+                                    bookViewModel.addBook(title, author, pages, isRead)
                                 } else {
-                                    viewModel.updateBook(existing.id, title, author, pages, isRead)
+                                    bookViewModel.updateBook(
+                                        id = existing.id,
+                                        title = title,
+                                        author = author,
+                                        pages = pages,
+                                        isRead = isRead
+                                    )
                                 }
-                                screen = Screen.List
+                                currentScreen = Screen.List
                             },
-                            onCancel = { screen = Screen.List }
+                            onCancel = { currentScreen = Screen.List }
                         )
                     }
                 }
