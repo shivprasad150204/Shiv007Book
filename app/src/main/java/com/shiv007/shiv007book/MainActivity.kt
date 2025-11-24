@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.shiv007.shiv007book.ViewModel.BookViewModel
-import com.shiv007.shiv007book.ui.theme.Shiv007BookTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -15,9 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            Shiv007BookTheme {
-                BookApp(bookViewModel)
-            }
+            BookApp(bookViewModel)
         }
     }
 }

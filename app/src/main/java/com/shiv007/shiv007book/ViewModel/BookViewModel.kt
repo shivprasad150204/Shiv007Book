@@ -15,11 +15,13 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: BookRepository
 
+    // Expose the list of books as a StateFlow for Compose
     val books: StateFlow<List<BookEntity>>
 
     init {
         val db = BookDatabase.getInstance(application)
-        repository = BookRepository(db.bookDao())
+        val dao = db.bookDao()
+        repository = BookRepository(dao)
 
         books = repository.books
             .stateIn(
