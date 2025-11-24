@@ -4,28 +4,20 @@ import kotlinx.coroutines.flow.Flow
 
 class BookRepository(private val dao: BookDao) {
 
-    val books: Flow<List<Book>> = dao.getAllBooks()
+    val books: Flow<List<BookEntity>> = dao.getAllBooks()
 
-    suspend fun addBook(
-        title: String,
-        author: String,
-        pages: Int,
-        category: String,
-        isRead: Boolean
-    ) {
-        val book = Book(
-            title = title,
-            author = author,
-            pages = pages,
-            category = category,
-            isRead = isRead
+    suspend fun addBook(title: String, author: String, pages: Int, isRead: Boolean) {
+        dao.insert(
+            BookEntity(
+                title = title,
+                author = author,
+                pages = pages,
+                isRead = isRead
+            )
         )
-        dao.insertBook(book)
     }
 
-    suspend fun updateBook(book: Book) = dao.updateBook(book)
+    suspend fun deleteBook(book: BookEntity) = dao.delete(book)
 
-    suspend fun deleteBook(book: Book) = dao.deleteBook(book)
-
-    suspend fun getBook(id: Int): Book? = dao.getBookById(id)
+    suspend fun clearAll() = dao.clearAll()
 }

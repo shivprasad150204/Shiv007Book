@@ -5,7 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Book::class], version = 1, exportSchema = false)
+@Database(
+    entities = [BookEntity::class],
+    version = 1,
+    exportSchema = false
+)
 abstract class BookDatabase : RoomDatabase() {
 
     abstract fun bookDao(): BookDao
@@ -14,14 +18,13 @@ abstract class BookDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: BookDatabase? = null
 
-        fun getInstance(context: Context): BookDatabase {
-            return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
+        fun getInstance(context: Context): BookDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     BookDatabase::class.java,
-                    "books_db"
+                    "shiv007_books.db"
                 ).build().also { INSTANCE = it }
             }
-        }
     }
 }
