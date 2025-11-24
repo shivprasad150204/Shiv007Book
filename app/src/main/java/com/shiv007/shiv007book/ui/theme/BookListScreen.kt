@@ -4,38 +4,41 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shiv007.shiv007book.ViewModel.BookViewModel
 import com.shiv007.shiv007book.data.Book
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookListScreen(
     bookViewModel: BookViewModel,
+    onBack: () -> Unit,
     onAddBook: () -> Unit,
-    onBookSelected: (Int) -> Unit,
-    onLogout: () -> Unit
+    onOpenBook: (Int) -> Unit
 ) {
-    val books = bookViewModel.books
+    val books by bookViewModel.books.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Books") },
-                actions = {
-                    TextButton(onClick = onLogout) {
-                        Text("Logout")
+                title = { Text("Your Books") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddBook) {
-                Text("+")
+                Icon(Icons.Default.Add, contentDescription = "Add book")
             }
         }
     ) { padding ->
@@ -44,9 +47,9 @@ fun BookListScreen(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = androidx.compose.ui.Alignment.Center
             ) {
-                Text("No books yet. Tap + to add.")
+                Text("No books yet. Tap + to add one.")
             }
         } else {
             LazyColumn(
@@ -57,7 +60,7 @@ fun BookListScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(books) { book ->
-                    BookListItem(book = book, onClick = { onBookSelected(book.id) })
+                    BookRow(book = book, onClick = { onOpenBook(book.id) })
                 }
             }
         }
@@ -65,7 +68,7 @@ fun BookListScreen(
 }
 
 @Composable
-private fun BookListItem(book: Book, onClick: () -> Unit) {
+private fun BookRow(book: Book, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -74,7 +77,7 @@ private fun BookListItem(book: Book, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(book.title, style = MaterialTheme.typography.titleMedium)
             Text("by ${book.author}", style = MaterialTheme.typography.bodyMedium)
-            Text("${book.pages} pages", style = MaterialTheme.typography.bodySmall)
+            Text("${book.pages} pages • ${book.category}", style = MaterialTheme.typography.bodySmall)
             Text(
                 if (book.isRead) "Finished" else "Not read yet",
                 style = MaterialTheme.typography.bodySmall
@@ -82,4 +85,3 @@ private fun BookListItem(book: Book, onClick: () -> Unit) {
         }
     }
 }
-
