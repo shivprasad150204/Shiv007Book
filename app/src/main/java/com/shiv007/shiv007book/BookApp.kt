@@ -198,12 +198,10 @@ fun HomeScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier
+            Modifier
                 .padding(padding)
                 .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), Arrangement.spacedBy(16.dp), Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Hello, $username",
@@ -230,18 +228,8 @@ fun HomeScreen(
                 Text("Add a New Book")
             }
 
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text("About Bookly", fontWeight = FontWeight.Bold)
-                    Text("A simple blue-themed app to track what you read.")
-                    Text("Built with Jetpack Compose, Room and ViewModel.")
-                }
-            }
+
+
         }
     }
 }
